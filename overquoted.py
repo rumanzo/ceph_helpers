@@ -59,7 +59,7 @@ class Cephrawoverqouted(object):
             elif (pool['tier_of'] == -1) and (pool['erasure_code_profile'] in erasureprofiles):
                 profile = self.info['erasure_code_profiles'][pool['erasure_code_profile']]
                 k, m = float(profile['k']), float(profile['m'])
-                poolfactors[pool['pool_name']] = 1+(m/(k+m))
+                poolfactors[pool['pool_name']] = 1+(m/k)
         return poolfactors
 
     def rbdsizeperpool(self):
