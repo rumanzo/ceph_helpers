@@ -4,7 +4,7 @@ import subprocess
 import re
 
 class Cephrawoverqouted(object):
-    def __init__(self, config='/etc/ceph/ceph/conf'):
+    def __init__(self, config='/etc/ceph/ceph.conf'):
         self.config = config
         self.tree = self.gettree()
         self.info = self.getpoolsinfo()
