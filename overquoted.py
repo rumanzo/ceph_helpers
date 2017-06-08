@@ -3,16 +3,17 @@ import json
 import subprocess
 import re
 
+
 class Cephrawoverqouted(object):
+
     def __init__(self, config='/etc/ceph/ceph.conf'):
         self.config = config
         self.tree = self.gettree()
         self.info = self.getpoolsinfo()
 
-
     def cephexecjson(self, string):
-        stdout, stderr = subprocess.Popen(re.split('\s+', string) + ['-c', self.config, '--format=json'] ,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        stdout, stderr = subprocess.Popen(re.split('\s+', string) + ['-c', self.config, '--format=json'],
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         if stderr:
             raise ValueError(stderr)
         else:
@@ -23,7 +24,7 @@ class Cephrawoverqouted(object):
 
     def getroots(self):
         return [x for x in self.tree if x['type'] == 'root']
-    
+
     def __recursein(self, ids):
         newids = set()
         for id in ids:
@@ -44,7 +45,8 @@ class Cephrawoverqouted(object):
         rootrawsize = {}
         osddf = self.cephexecjson('ceph osd df')
         for root, items in self.rootssumosd().items():
-            rootrawsize[root] = sum({row['id']: row['kb'] for row in osddf['nodes'] if row['id'] in items}.values())
+            rootrawsize[root] = sum({row['id']: row['kb'] for row in osddf[
+                                    'nodes'] if row['id'] in items}.values())
         return rootrawsize
 
     def getpoolsinfo(self):
@@ -54,12 +56,13 @@ class Cephrawoverqouted(object):
         erasureprofiles = self.info['erasure_code_profiles'].keys()
         poolfactors = {}
         for pool in self.info['pools']:
-            if (pool['tier_of'] == -1) and (pool['erasure_code_profile'] not in erasureprofiles) :
+            if (pool['tier_of'] == -1) and (pool['erasure_code_profile'] not in erasureprofiles):
                 poolfactors[pool['pool_name']] = pool['size']
             elif (pool['tier_of'] == -1) and (pool['erasure_code_profile'] in erasureprofiles):
-                profile = self.info['erasure_code_profiles'][pool['erasure_code_profile']]
+                profile = self.info['erasure_code_profiles'][
+                    pool['erasure_code_profile']]
                 k, m = float(profile['k']), float(profile['m'])
-                poolfactors[pool['pool_name']] = 1+(m/k)
+                poolfactors[pool['pool_name']] = 1 + (m / k)
         return poolfactors
 
     def rbdsizeperpool(self):
@@ -68,19 +71,20 @@ class Cephrawoverqouted(object):
             if (pool['tier_of'] == -1):
                 imagesizes = []
                 for image in self.cephexecjson('rbd ls {}'.format(pool['pool_name'])):
-                    imagesizes.append(self.cephexecjson('rbd info {}/{}'.format(pool['pool_name'], image))['size'])
+                    imagesizes.append(self.cephexecjson(
+                        'rbd info {}/{}'.format(pool['pool_name'], image))['size'])
                 rbdsizesperpool[pool['pool_name']] = sum(imagesizes)
         return rbdsizesperpool
-
 
 
 if __name__ == '__main__':
     main = Cephrawoverqouted(config='/etc/ceph/ceph.conf')
     for root, size in main.rootrawsize_kb().items():
-        print('Size root {}: {} GB'.format(root, size/1024/1024))
+        print('Size root {}: {} GB'.format(root, size / 1024 / 1024))
     for key, value in main.rbdsizeperpool().items():
-        print('Fullsize rbd images in pool {}: {} GB'.format(key, value*main.poolfactor()[key]/1024/1024/1024))
+        print('Fullsize rbd images in pool {}: {} GB'.format(
+            key, value * main.poolfactor()[key] / 1024 / 1024 / 1024))
     summ = []
     for key, value in main.rbdsizeperpool().items():
-        summ.append(value*main.poolfactor()[key]/1024/1024/1024)
+        summ.append(value * main.poolfactor()[key] / 1024 / 1024 / 1024)
     print('Summary fullsize rbd in pools: {} GB'.format(sum(summ)))
