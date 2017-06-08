@@ -15,7 +15,7 @@ class Cephrawoverqouted(object):
         stdout, stderr = subprocess.Popen(re.split('\s+', string) + ['-c', self.config, '--format=json'],
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         if stderr:
-            raise ValueError(stderr)
+            raise ValueError(stderr.decode('utf-8'))
         else:
             return json.loads(stdout)
 
