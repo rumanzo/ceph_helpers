@@ -17,7 +17,11 @@ class Cephrawoverqouted(object):
         if stderr:
             raise ValueError(stderr.decode('utf-8'))
         else:
-            return json.loads(stdout)
+            try:
+                return json.loads(stdout)
+            except ValueError:
+                stdout = stdout.replace('-nan', '0')
+                return json.loads(stdout)
 
     def gettree(self):
         return self.cephexecjson('ceph osd tree')['nodes']
