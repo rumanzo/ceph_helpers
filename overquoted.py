@@ -45,10 +45,19 @@ class Cephrawoverqouted(object):
             osdsum[row['name']] = self.__recursein(row['children'])
         return osdsum
 
-    def rootrawsize_kb(self):
+    def deviceclasssumosd(self):
+        osdsum = {}
+        types= set([row['device_class'] for row in self.gettree() if 'device_class' in row])
+        if not types:
+            return None
+        for devclass in types:
+            osdsum[devclass] = set([row['id'] for row in self.gettree() if 'device_class' in row and row['device_class'] == devclass])
+        return osdsum
+
+    def rootrawsize_kb(self, items):
         rootrawsize = {}
         osddf = self.cephexecjson('ceph osd df')
-        for root, items in self.rootssumosd().items():
+        for root, items in items.items():
             rootrawsize[root] = sum({row['id']: row['kb'] for row in osddf[
                                     'nodes'] if row['id'] in items}.values())
         return rootrawsize
@@ -83,7 +92,10 @@ class Cephrawoverqouted(object):
 
 if __name__ == '__main__':
     main = Cephrawoverqouted(config='/etc/ceph/ceph.conf')
-    for root, size in main.rootrawsize_kb().items():
+    if main.deviceclasssumosd():
+	 for root, size in main.rootrawsize_kb(main.deviceclasssumosd()).items():
+             print('Size device class root {}: {} GB'.format(root, size / 1024 / 1024))
+    for root, size in main.rootrawsize_kb(main.rootssumosd()).items():
         print('Size root {}: {} GB'.format(root, size / 1024 / 1024))
     for key, value in main.rbdsizeperpool().items():
         print('Fullsize rbd images in pool {}: {} GB'.format(
