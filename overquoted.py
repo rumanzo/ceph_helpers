@@ -93,8 +93,8 @@ class Cephrawoverqouted(object):
 if __name__ == '__main__':
     main = Cephrawoverqouted(config='/etc/ceph/ceph.conf')
     if main.deviceclasssumosd():
-	 for root, size in main.rootrawsize_kb(main.deviceclasssumosd()).items():
-             print('Size device class root {}: {} GB'.format(root, size / 1024 / 1024))
+        for root, size in main.rootrawsize_kb(main.deviceclasssumosd()).items():
+            print('Size device class root {}: {} GB'.format(root, size / 1024 / 1024))
     for root, size in main.rootrawsize_kb(main.rootssumosd()).items():
         print('Size root {}: {} GB'.format(root, size / 1024 / 1024))
     for key, value in main.rbdsizeperpool().items():
