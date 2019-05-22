@@ -1,1 +1,0 @@
-../cephinfo/cephinfo.py
